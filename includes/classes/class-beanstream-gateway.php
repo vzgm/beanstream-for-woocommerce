@@ -38,7 +38,7 @@
 					'payment_method' => 'card',
 					'card' => array(
 						'name' => 'John Doe',
-						'number' => '5100000010001000',
+						'number' => '5100000010001004',
 						'expiry_month' => '02',
 						'expiry_year' => '17',
 						'cvd' => '123'
@@ -273,17 +273,7 @@
                 'required'          => false,
 				'value'				=> false,
             ) );
-			
-			woocommerce_form_field( 'beanstream-user-cvc', array(				                
-				'type'				=> 'checkbox',
-				'label'             => __( 'Save CVC', 'beanstream-for-woocommerce' ),
-				'class'             => array( 'form-row-first form-row-first-padding' ),	
-				'input_class'       => array( 'beanstream-save-card' ),			
-                'required'          => false,
-				'value'				=> false,
-            ) );
-
-			
+						
 		}
 	}
 	

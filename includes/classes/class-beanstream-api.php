@@ -24,8 +24,7 @@
      * @param       string $post_location
      * @return      array
      */
-    public static function post_data( $post_data, $post_location = 'payments' ) {
-        
+    public static function post_data( $post_data, $post_location = 'payments' ) {        
 		global $beanstream_for_wc;
 		$base_url = str_replace("{0}", $beanstream_for_wc->settings['platform'], self::$api_endpoint );
 		$payment_endpoint = str_replace("{1}", $beanstream_for_wc->settings['api_version'], $base_url );
@@ -55,26 +54,27 @@
      * @param       string $get_location
      * @return      array
      */
-    public static function get_data( $get_location ) {
-		
+    public static function get_data( $get_location ) {		
         global $beanstream_for_wc;
 		$base_url = str_replace("{0}", $beanstream_for_wc->settings['platform'], self::$api_endpoint );
 		$payment_endpoint = str_replace("{1}", $beanstream_for_wc->settings['api_version'], $base_url );
 		
 		$merchantId = $beanstream_for_wc->settings['merchant_id'];
 		$passcode 	= $beanstream_for_wc->settings['api_pass_key'];
-
-        $response = wp_remote_get( self::$api_endpoint . $get_location, array(
+		
+        $response = wp_remote_post( $payment_endpoint . $post_location, array(
             'method'        => 'GET',
             'headers'       => array(
-                'Authorization' => 'Basic ' . base64_encode( $s4wc->settings['secret_key'] . ':' ),
+				'Content-Type'	=> 'application/json',
+                'Authorization' => 'Passcode ' . base64_encode( $merchantId . ":" . $passcode ),
             ),
+            'body'          => json_encode($post_data),
             'timeout'       => 70,
             'sslverify'     => false,
             'user-agent'    => 'WooCommerce-Beanstream',
         ) );
 
-        //return S4WC_API::parse_response( $response );
+        return Beanstream_API::parse_response( $response );
     }	
 	
 	/**
@@ -94,10 +94,6 @@
         }
 
         $parsed_res = json_decode( $response['body'] );
-		
-		print '<pre>';
-		print_r( $parsed_res );
-		print '</pre>';
 		
         // Handle response
         if( isset( $parsed_res->code ) && 1 < $parsed_res->code && !( $parsed_res->http_code >= 200 && $parsed_res->http_code < 300 ) ) {
