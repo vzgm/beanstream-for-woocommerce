@@ -45,7 +45,7 @@
             'user-agent'    => 'WooCommerce-Beanstream',
         ) );
 				
-        //return S4WC_API::parse_response( $response );
+        return Beanstream_API::parse_response( $response );
     }
 
 	/**
@@ -86,22 +86,24 @@
      */
     public static function parse_response( $response ) {
         if ( is_wp_error( $response ) ) {
-            throw new Exception( 's4wc_problem_connecting' );
+            throw new Exception( 'beanstream_problem_connecting' );
         }
 
         if ( empty( $response['body'] ) ) {
-            throw new Exception( 's4wc_empty_response' );
+            throw new Exception( 'beanstream_empty_response' );
         }
 
-        $parsed_response = json_decode( $response['body'] );
-
+        $parsed_res = json_decode( $response['body'] );
+		
+		print '<pre>';
+		print_r( $parsed_res );
+		print '</pre>';
+		
         // Handle response
-        if ( ! empty( $parsed_response->error ) && ! empty( $parsed_response->error->code ) ) {
-            throw new Exception( $parsed_response->error->code );
-        } elseif ( empty( $parsed_response->id ) ) {
-            throw new Exception( 's4wc_invalid_response' );
+        if( isset( $parsed_res->code ) && 1 < $parsed_res->code && !( $parsed_res->http_code >= 200 && $parsed_res->http_code < 300 ) ) {
+            throw new Exception( $parsed_res->message );
         }
 
-        return $parsed_response;
+        return $parsed_res;
     }
  }

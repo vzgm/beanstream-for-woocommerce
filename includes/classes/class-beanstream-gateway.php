@@ -31,7 +31,6 @@
 		//testing beanstream api, delete after testing all;
 		$order_id = bin2hex(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM));
 		
-		
 		$post = array(
 					'merchant_id' => $beanstream_for_wc->settings['merchant_id'],
 					'order_number' => $order_id,
@@ -39,14 +38,23 @@
 					'payment_method' => 'card',
 					'card' => array(
 						'name' => 'John Doe',
-						'number' => '5100000010001004',
+						'number' => '5100000010001000',
 						'expiry_month' => '02',
 						'expiry_year' => '17',
 						'cvd' => '123'
 					)
 				);        
-
-		Beanstream_API::post_data( $post, 'payments' );
+		//number 5100000010001004
+		try {
+			$response = Beanstream_API::post_data( $post, 'payments' );
+			
+			print 'Response from Beanstream server: ';
+			print '<pre>';
+			print_r( $response );
+			print '</pre>';
+		} catch ( Exception $e ) {
+			echo $e->getMessage();
+		}
 		
         $this->id           = 'beanstream';
         $this->method_title = 'Beanstream for WooCommerce';

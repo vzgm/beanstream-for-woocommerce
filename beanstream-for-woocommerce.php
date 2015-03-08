@@ -78,6 +78,31 @@ class BeanStream_For_WC {
         return $methods;
     }
 	
+	/**
+     * Localize Beanstrem error messages
+     *
+     * @access      protected
+     * @param       Exception $e
+     * @return      string
+     */
+    public function get_error_message( $e ) {
+
+        switch ( $e->getMessage() ) {
+			
+            // Messages from Beanstream
+            case 'beanstream_problem_connecting':
+            case 'beanstream_empty_response':
+            case 'beanstream_invalid_response':
+                $message = __( 'There was a problem connecting to the payment gateway.', 'beanstream-for-woocommerce' );
+                break;
+
+            default:
+                $message = __( 'Failed to process the order, please try again later.', 'beanstream-for-woocommerce' );
+        }
+
+        return $message;
+    }
+	
 }
 
 //init wc_beanstream
