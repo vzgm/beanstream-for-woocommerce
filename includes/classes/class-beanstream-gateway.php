@@ -31,6 +31,7 @@
 		//testing beanstream api, delete after testing all;
 		$order_id = bin2hex(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM));
 		
+		
 		$post = array(
 					'merchant_id' => $beanstream_for_wc->settings['merchant_id'],
 					'order_number' => $order_id,
