@@ -102,5 +102,17 @@
 
         return $parsed_res;
     }
-		
+
+	/**
+     * Used for OTP ( One Time Payment )
+     *
+     * @access      public
+     * @param       array $charge_data
+     * @return      array
+     */	
+	public static function onetime_payment( $charge_data )	{
+		print '<pre>';
+		print_r( $charge_data );
+		print '</pre>';
+	}
  }

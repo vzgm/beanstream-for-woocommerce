@@ -26,37 +26,7 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
     protected $transaction_error_message = null;
 	
 	public function __construct() {
-		global $beanstream_for_wc;
-		
-		/*
-		//testing beanstream api, delete after testing all;
-		$order_id = bin2hex(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM));
-		
-		$post = array(
-					'merchant_id' => $beanstream_for_wc->settings['merchant_id'],
-					'order_number' => $order_id,
-					'amount' => 10.00,
-					'payment_method' => 'card',
-					'card' => array(
-						'name' => 'John Doe',
-						'number' => '5100000010001004',
-						'expiry_month' => '02',
-						'expiry_year' => '17',
-						'cvd' => '123'
-					)
-				);        
-		//number 5100000010001004
-		try {
-			$response = Beanstream_API::post_data( $post, 'payments' );
-			
-			print 'Response from Beanstream server: ';
-			print '<pre>';
-			print_r( $response );
-			print '</pre>';
-		} catch ( Exception $e ) {
-			echo $e->getMessage();
-		}
-		*/
+		global $beanstream_for_wc;		
         $this->id           = 'beanstream';
         $this->method_title = 'Beanstream for WooCommerce';
         $this->has_fields   = true;
@@ -383,14 +353,10 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
         $this->form_data = $this->get_form_data();
 		
 		try {
-			print '<pre>';
-			print_r( $this->form_data );
-			print '</pre>';
-
+			
             // Allow for any type of charge to use the same try/catch config
             $this->charge_set_up();
 			
-
 		} catch( Exception $e ) {
 			
 			// Stop page reload if we have errors to show
@@ -436,15 +402,7 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
         global $beanstream_for_wc;
 
         $customer_info = get_user_meta( $this->order->user_id, $beanstream_for_wc->settings['beanstream_db_location'], true );
-				
-        // Allow options to be set without modifying sensitive data like amount, currency, etc.
-        $beanstream_charge_data = apply_filters( 'beanstream_charge_data', array(), $this->form_data, $this->order );
-		
-        // Set up basics for charging
-        $beanstream_charge_data['amount']   	= $this->form_data['amount'];
-        $beanstream_charge_data['capture']  	= ( $this->settings['charge_type'] == 'capture' ) ? 'true' : 'false';
-        $beanstream_charge_data['description'] 	= $this->get_charge_description(); // Charge description									
-		
+						
         // Make sure we only create customers if a user is logged in
         if ( is_user_logged_in() && $this->settings['saved_cards'] === 'yes' ) {
 			//work on this section later because it was related to saving cards	
@@ -462,9 +420,33 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
             }
 			*/
         } else { // Handles OTP ( One Time Payment i.e one time charge won't save the card in the server ) Routine
-	        $charge = Beanstream_API::onetime_payment( $beanstream_charge_data );
-        	$this->charge = $charge;
-        	$this->transaction_id = $charge->id;            
+		
+			$cardnumber   = isset( $_POST['beanstream-card-number'] ) ? $_POST['beanstream-card-number'] : '';
+        	$cardexpiry   = isset( $_POST['beanstream-card-expiry'] ) ? $_POST['beanstream-card-expiry'] : '';
+        	$cardcvc      = isset( $_POST['beanstream-card-cvc'] ) ? $_POST['beanstream-card-cvc'] : '';
+			
+			//split expiry field in order to get month and year section
+			$cardexpiry	  = explode( "/", $cardexpiry);		
+			$month		  = isset( $cardexpiry[0] ) ?  $cardexpiry[0] : '00';
+			$year		  = isset( $cardexpiry[1] ) ?  $cardexpiry[1] : '00';
+										
+			$charge_data = array(
+						    'order_number' => $this->order->id,
+							'amount' => $this->form_data['amount'],
+							'payment_method' => 'card',
+							'card' => array(
+								   'name' => $this->form_data['customer']['name'],
+								   'number' => $cardnumber,
+								   'expiry_month' => $month,
+								   'expiry_year' => $year,
+								   'cvd' => $cardcvc
+							)
+						   );
+					
+	        $charge = Beanstream_API::onetime_payment( $charge_data );    
+
+        	//$this->charge = $charge;
+        	//$this->transaction_id = $charge->id;            
         }
 		
     }
