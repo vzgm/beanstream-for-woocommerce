@@ -30,10 +30,7 @@ class BeanStream_For_WC {
 		//files related to beanstream which handles cc processing, customer profiling etc.,
 		include_once( 'includes/general-functions.php' );
         include_once( 'includes/classes/class-beanstream-api.php' );
-        //include_once( 'includes/classes/class-beanstream-db.php' );
-        //include_once( 'includes/classes/class-beanstream-profile.php' );
-		
-		
+				
         $this->settings = get_option( 'woocommerce_beanstream_settings', array() );
 		
 		// Add default values for fresh installs
@@ -51,10 +48,9 @@ class BeanStream_For_WC {
 		
 		// Hooks
         add_filter( 'woocommerce_payment_gateways', array( $this, 'add_beanstream_gateway' ) );
-        //add_action( 'woocommerce_order_status_processing_to_completed', array( $this, 'order_status_completed' ) );
 
         // Localization
-        //load_plugin_textdomain( 'stripe-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );		
+        load_plugin_textdomain( 'beanstream-for-woocommerce', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );		
 		
 	}
 	
@@ -69,12 +65,10 @@ class BeanStream_For_WC {
         if ( ! class_exists( 'WC_Payment_Gateway' ) ) {
             return;
         }
-
+		
         // Include payment gateway
         include_once( 'includes/classes/class-beanstream-gateway.php' );
-
         $methods[] = 'Beanstream_Gateway';
-
         return $methods;
     }
 	
@@ -95,14 +89,15 @@ class BeanStream_For_WC {
             case 'beanstream_invalid_response':
                 $message = __( 'There was a problem connecting to the payment gateway.', 'beanstream-for-woocommerce' );
                 break;
-
+			case 'DECLINE':
+                $message = __( 'There was a problem processing your credit card. Please check your payment information and try again.', 'beanstream-for-woocommerce' );
+                break;			
             default:
                 $message = __( 'Failed to process the order, please try again later.', 'beanstream-for-woocommerce' );
         }
 
         return $message;
-    }
-	
+    }	
 }
 
 //init wc_beanstream

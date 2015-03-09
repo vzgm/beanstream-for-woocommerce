@@ -25,25 +25,36 @@
      * @return      array
      */
     public static function post_data( $post_data, $post_location = 'payments' ) {        
-		global $beanstream_for_wc;
-		$base_url = str_replace("{0}", $beanstream_for_wc->settings['platform'], self::$api_endpoint );
-		$payment_endpoint = str_replace("{1}", $beanstream_for_wc->settings['api_version'], $base_url );
+		global $beanstream_for_wc;		
+		$base_url 			= str_replace("{0}", $beanstream_for_wc->settings['platform'], self::$api_endpoint );
+		$gateway_endpoint 	= str_replace("{1}", $beanstream_for_wc->settings['api_version'], $base_url );
+
+		if( $post_location == "payments" ) {
+			$gateway_endpoint = $gateway_endpoint . $post_location; 
+			$post_data_local  = $post_data;
+		}
 		
+		if( $post_location == "refund" ) {
+			$gateway_endpoint = $gateway_endpoint . 'payments/' . $post_data['transaction_id'] . '/returns'; 
+			$post_data_local['order_number'] 	= $post_data['order_id'];
+			$post_data_local['amount'] 			= $post_data['amount'];
+		}
+				
 		$merchantId = $beanstream_for_wc->settings['merchant_id'];
 		$passcode 	= $beanstream_for_wc->settings['api_pass_key'];
 		
-		$response = wp_remote_post( $payment_endpoint . $post_location, array(
+		$response = wp_remote_post( $gateway_endpoint, array(
             'method'        => 'POST',
             'headers'       => array(
 				'Content-Type'	=> 'application/json',
                 'Authorization' => 'Passcode ' . base64_encode( $merchantId . ":" . $passcode ),
             ),
-            'body'          => json_encode($post_data),
+            'body'          => json_encode($post_data_local),
             'timeout'       => 70,
             'sslverify'     => false,
             'user-agent'    => 'WooCommerce-Beanstream',
         ) );
-				
+		
         return Beanstream_API::parse_response( $response );
     }
 
@@ -102,17 +113,16 @@
 
         return $parsed_res;
     }
-
+	
 	/**
-     * Used for OTP ( One Time Payment )
+     * Create refund on Beanstream servers
      *
      * @access      public
-     * @param       array $charge_data
+     * @param       array $refund_data
      * @return      array
-     */	
-	public static function onetime_payment( $charge_data )	{
-		print '<pre>';
-		print_r( $charge_data );
-		print '</pre>';
-	}
+     */
+    public static function create_refund( $refund_data ) {
+		return Beanstream_API::post_data( $refund_data, "refund" );
+    }
+		
  }
