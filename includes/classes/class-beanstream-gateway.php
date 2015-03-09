@@ -16,10 +16,10 @@
  *
  */
  
- // Exit if accessed directly
- if ( ! defined( 'ABSPATH' ) ) exit;
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) exit;
  
- class Beanstream_Gateway extends WC_Payment_Gateway {
+class Beanstream_Gateway extends WC_Payment_Gateway {
 	protected $order                     = null;
     protected $form_data                 = null;
     protected $transaction_id            = null;
@@ -28,6 +28,7 @@
 	public function __construct() {
 		global $beanstream_for_wc;
 		
+		/*
 		//testing beanstream api, delete after testing all;
 		$order_id = bin2hex(mcrypt_create_iv(22, MCRYPT_DEV_URANDOM));
 		
@@ -55,7 +56,7 @@
 		} catch ( Exception $e ) {
 			echo $e->getMessage();
 		}
-		
+		*/
         $this->id           = 'beanstream';
         $this->method_title = 'Beanstream for WooCommerce';
         $this->has_fields   = true;
@@ -146,7 +147,7 @@
      * @access      public
      * @return      void
      */
-    public function init_form_fields() {
+	public function init_form_fields() {
         $this->form_fields = array(
             'enabled' => array(
                 'type'          => 'checkbox',
@@ -185,7 +186,7 @@
             ),            
             'saved_cards' => array(
                 'type'          => 'checkbox',
-                'title'         => __( 'Saved Cards', 'beanstream-for-woocommerce' ),
+                'title'         => __( 'Save Cards', 'beanstream-for-woocommerce' ),
                 'description'   => __( 'Allow customers to use saved cards for future purchases.', 'beanstream-for-woocommerce' ),
                 'default'       => 'yes',
             ),            
@@ -321,5 +322,178 @@
             return sprintf( __( '%s is a required field.', 'beanstream-for-woocommerce' ), "<strong>$field</strong>" );
         }
     }
+	
+    /**
+     * Process the payment and return the result
+     *
+     * @access      public
+     * @param       int $order_id
+     * @return      array
+     */
+    public function process_payment( $order_id ) {
+
+        if ( $this->send_to_beanstream( $order_id ) ) {
+            $this->order_complete();
+
+            $result = array(
+                'result' => 'success',
+                'redirect' => $this->get_return_url( $this->order )
+            );
+
+            return $result;
+        } else {
+            $this->payment_failed();
+
+            // Add a generic error message if we don't currently have any others
+            if ( wc_notice_count( 'error' ) == 0 ) {
+                wc_add_notice( __( 'Transaction Error: Could not complete your payment.', 'beanstream-for-woocommerce' ), 'error' );
+            }
+        }
+    }
+	
+	/**
+     * Process refund
+     *
+     * Overriding refund method
+     *
+     * @access      public
+     * @param       int $order_id
+     * @param       float $amount
+     * @param       string $reason
+     * @return      mixed True or False based on success, or WP_Error
+     */
+    public function process_refund( $order_id, $amount = null, $reason = '' ) {
+	}
+	
+	/**
+     * Send form data to Beanstream
+     * Handles sending the charge to an existing customer, a new customer (that's logged in), or a guest
+     *
+     * @access      protected
+     * @param       int $order_id
+     * @return      bool
+     */
+    protected function send_to_beanstream( $order_id ) {
+		global $beanstream_for_wc;
+		
+		// Get the order based on order_id
+        $this->order = new WC_Order( $order_id );
+		
+		 // Get the credit card details submitted by the form
+        $this->form_data = $this->get_form_data();
+		
+		try {
+			print '<pre>';
+			print_r( $this->form_data );
+			print '</pre>';
+
+            // Allow for any type of charge to use the same try/catch config
+            $this->charge_set_up();
 			
- }
+
+		} catch( Exception $e ) {
+			
+			// Stop page reload if we have errors to show
+            unset( WC()->session->reload_checkout );
+
+            $this->transaction_error_message = $beanstream_for_wc->get_error_message( $e );
+
+            wc_add_notice( __( 'Error:', 'beanstream-for-woocommerce' ) . ' ' . $this->transaction_error_message, 'error' );
+
+            return false;
+		}
+	}
+	
+	/**
+     * Retrieve the form fields
+     *
+     * @access      protected
+     * @return      mixed
+     */
+    protected function get_form_data() {
+
+        if ( $this->order && $this->order != null ) {
+            return array(
+                'amount'        => (float) $this->order->get_total(),
+                'chosen_card'   => isset( $_POST['beanstream_card'] ) ? $_POST['beanstream_card'] : 'new',
+                'customer'      => array(
+                    'name'              => $this->order->billing_first_name . ' ' . $this->order->billing_last_name,
+                    'billing_email'     => $this->order->billing_email,
+                )
+            );
+        }
+
+        return false;
+    }
+	
+	/**
+     * Set up the charge that will be sent to Beanstream
+     *
+     * @access      private
+     * @return      void
+     */
+    private function charge_set_up() {
+        global $beanstream_for_wc;
+
+        $customer_info = get_user_meta( $this->order->user_id, $beanstream_for_wc->settings['beanstream_db_location'], true );
+				
+        // Allow options to be set without modifying sensitive data like amount, currency, etc.
+        $beanstream_charge_data = apply_filters( 'beanstream_charge_data', array(), $this->form_data, $this->order );
+		
+        // Set up basics for charging
+        $beanstream_charge_data['amount']   	= $this->form_data['amount'];
+        $beanstream_charge_data['capture']  	= ( $this->settings['charge_type'] == 'capture' ) ? 'true' : 'false';
+        $beanstream_charge_data['description'] 	= $this->get_charge_description(); // Charge description									
+		
+        // Make sure we only create customers if a user is logged in
+        if ( is_user_logged_in() && $this->settings['saved_cards'] === 'yes' ) {
+			//work on this section later because it was related to saving cards	
+			/*
+            // Add a customer or retrieve an existing one
+            $customer = $this->get_customer();
+
+            $beanstream_charge_data['card'] 	= $customer['card'];
+            $beanstream_charge_data['customer'] = $customer['customer_id'];
+
+            // Update default card
+            if ( count( $customer_info['cards'] ) && $this->form_data['chosen_card'] !== 'new' ) {
+                $default_card = $customer_info['cards'][ intval( $this->form_data['chosen_card'] ) ]['id'];
+                S4WC_DB::update_customer( $this->order->user_id, array( 'default_card' => $default_card ) );
+            }
+			*/
+        } else { // Handles OTP ( One Time Payment i.e one time charge won't save the card in the server ) Routine
+	        $charge = Beanstream_API::onetime_payment( $beanstream_charge_data );
+        	$this->charge = $charge;
+        	$this->transaction_id = $charge->id;            
+        }
+		
+    }
+	
+	/**
+     * Get the description of the Order
+     *
+     * @access      protected
+     * @param       string $type Type of product being bought
+     * @return      string
+     */
+    protected function get_charge_description( ) {
+        $order_items = $this->order->get_items();
+		$product_name = __( 'Purchases', 'beanstream-for-woocommerce' );
+
+        // Grab first viable product name and use it
+        foreach ( $order_items as $key => $item ) {
+        	$product_name = $item['name'];
+            break;
+        }
+
+        // Charge description
+        $charge_description = sprintf(
+            __( 'Payment for %s (Order: %s)', 'beanstream-for-woocommerce' ),
+            $product_name,
+            $this->order->get_order_number()
+        );
+
+        return apply_filters( 'beanstream_charge_description', $charge_description, $this->form_data, $this->order );
+    }
+	
+}
