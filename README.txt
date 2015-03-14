@@ -11,7 +11,7 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 A Payment Gateway for WooCommerce allowing you to take credit card payments using Beanstream.
 
 == Description ==
-
+= What is Beanstream? =
 [Beanstream] (https://www.beanstream.com/) allows you to process credit cards through its gateway. This plugin aims to show anyone that they can use Beanstream to take credit card payments in their WooCommerce store without having to write a single line of code. All you have to do is copy Merchand id and API pass key to a settings page and you're done.
 
 = Why Beanstream? =
@@ -28,7 +28,7 @@ If you'd like to contribute, feel free to tackle a feature or fix a bug on [Gith
 
 = Automatic installation =
 Automatic installation is the easiest option as WordPress handles the file transfers itself and you don't need to leave your web browser. To do an automatic install of WooCommerce, log in to your WordPress dashboard, navigate to the Plugins menu and click Add New.
-In the search field type “Beanstream for WooCommerce” and click Search Plugins. Once you've found our plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking “Install Now”.
+In the search field type "Beanstream for WooCommerce" and click Search Plugins. Once you've found our plugin you can view details about it such as the the point release, rating and description. Most importantly of course, you can install it by simply clicking "Install Now".
 
 = Manual installation =
 1. Upload 'beanstream-for-woocommerce' to the '/wp-content/plugins/' directory
@@ -58,7 +58,7 @@ The plugin should automatically update with new features, but you could always d
 Yes you do. For any transaction involving sensitive information, you should take security seriously, and credit card information is incredibly sensitive. This plugin disables itself if you try to process live transactions without an SSL certificate. You can read [Beanstream's reasaoning for using SSL here](http://developer.beanstream.com/tag/ssl/).
 
 = Does this plugin work with Subscriptions? =
-No. But If you want that to implement subscriptions for this plugin you can contact me at vkuberan@outlook.com
+No. But If you want to this plugin to support subscription you can contact me at vkuberan@outlook.com
 
 = How can I help improve it? =
 You're the best. The [Beanstram for WooCommerce GitHub repository](https://github.com/vkuberan/beanstream-for-woocommerce) is a great place to start. Feel free to look through the issues already reported, or add your own. If you feel like you can fix something or improve the code, feel free to send a pull request and explain what's going on and I'll be glad to merge it into the plugin.
