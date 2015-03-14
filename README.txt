@@ -41,7 +41,10 @@ In the search field type “Beanstream for WooCommerce” and click Search Plugins. 
 Go to the WooCommerce settings, click the checkout tab, then click the Beanstream for WooCommerce link at the top of the page. Once there, you should make sure the enable checkbox is checked, and then you just need to fill in your merchand Id and API pass code settings which can be found on your [Beanstream account page](https://www.beanstream.com/admin/). That's it.
 Once you're ready to take live payments, make sure the test mode checkbox is unchecked. You'll also need to force SSL on checkout in the WooCommerce settings and of course have an SSL certificate.
 
-= Updating =
+== Upgrade Notice ==
+Version 1.0  is major release.
+
+== Updating ==
 The plugin should automatically update with new features, but you could always download the new version of the plugin and manually update the same way you would manually install.
 
 == Screenshots ==
