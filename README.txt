@@ -58,7 +58,7 @@ The plugin should automatically update with new features, but you could always d
 Yes you do. For any transaction involving sensitive information, you should take security seriously, and credit card information is incredibly sensitive. This plugin disables itself if you try to process live transactions without an SSL certificate. You can read [Beanstream's reasaoning for using SSL here](http://developer.beanstream.com/tag/ssl/).
 
 = Does this plugin work with Subscriptions? =
-No. But If you want to this plugin to support subscription you can contact me at vkuberan@outlook.com
+No. But If you want this plugin to work on subscriptions, You can contact me at vkuberan@outlook.com
 
 = How can I help improve it? =
 You're the best. The [Beanstram for WooCommerce GitHub repository](https://github.com/vkuberan/beanstream-for-woocommerce) is a great place to start. Feel free to look through the issues already reported, or add your own. If you feel like you can fix something or improve the code, feel free to send a pull request and explain what's going on and I'll be glad to merge it into the plugin.
