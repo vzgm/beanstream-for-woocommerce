@@ -13,4 +13,4 @@ If you use this plugin, all you have to do is include an SSL certificate on your
 
 
 ## Contributing
-If you'd like to contribute, feel free to tackle a feature or fix a bug and when you're ready, send a pull request. If you'd like to get more involved than that, please e-mail me at [vkuberan@outlook.com](mailto:vkuberan@outlook.com).
+If you'd like to contribute, feel free to tackle a feature or fix a bug and when you're ready, send a pull request. If you'd like to get more involved than that, please e-mail me at [vkuberan@gmail.com](mailto:vkuberan@gmail.com) or [vkuberan@outlook.com](mailto:vkuberan@outlook.com).
