@@ -107,7 +107,10 @@
         $parsed_res = json_decode( $response['body'] );
 		
         // Handle response
-        if( isset( $parsed_res->code ) && 1 < $parsed_res->code && !( $parsed_res->http_code >= 200 && $parsed_res->http_code < 300 ) ) {
+        if( 
+            isset( $parsed_res->code ) && 1 < $parsed_res->code 
+            && ( isset( $parsed_res->http_code ) && !( $parsed_res->http_code >= 200 && $parsed_res->http_code < 300 ) ) 
+        ) {
             throw new Exception( $parsed_res->message );
         }
 

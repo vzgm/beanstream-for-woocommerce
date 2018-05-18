@@ -169,6 +169,13 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
                 'title'         => __( 'Beanstream API pass keys', 'beanstream-for-woocommerce' ),
                 'default'       => '',
             ),
+            'order_prefix' => array(
+                'type'          => 'text',
+                'title'         => __( 'Order prefix', 'beanstream-for-woocommerce' ),
+                'description'   => __( 'Order prefix is optional but if added here, wil be added to order name: PREFIX_xxxxxxx', 'beanstream-for-woocommerce' ),
+                'default'       => '',
+            ),
+
         );
     }
 	
@@ -434,6 +441,7 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
 			$cardnumber   = isset( $_POST['beanstream-card-number'] ) ? $_POST['beanstream-card-number'] : '';
         	$cardexpiry   = isset( $_POST['beanstream-card-expiry'] ) ? $_POST['beanstream-card-expiry'] : '';
         	$cardcvc      = isset( $_POST['beanstream-card-cvc'] ) ? $_POST['beanstream-card-cvc'] : '';
+            $prefix       = ( isset($this->settings['order_prefix']) && !empty($this->settings['order_prefix']) ) ? $this->settings['order_prefix'].'_' : '';
 			
 			//split expiry field in order to get month and year section
 			$cardexpiry	  = explode( "/", $cardexpiry);		
@@ -441,7 +449,7 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
 			$year		  = isset( $cardexpiry[1] ) ?  $cardexpiry[1] : '00';
 								
 			$post 		  = array(
-								'order_number' => $this->order->id,
+								'order_number' => $prefix.$this->order->id,
 								'amount' => $this->form_data['amount'],
 								'payment_method' => 'card',
 								'card' => array(
@@ -456,7 +464,7 @@ class Beanstream_Gateway extends WC_Payment_Gateway {
 					
 			$response = Beanstream_API::post_data( $post, 'payments' );	        	
 			$this->charge = $response;
-	        $this->transaction_id = $response->id;												
+	        $this->transaction_id = $response->id;		
 			return true;				
 		} catch ( Exception $e ) {
 			// Stop page reload if we have errors to show
